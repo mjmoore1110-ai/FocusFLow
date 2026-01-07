@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow - Built for ADHD Brains</title>
+    <style>
+        /* ADHD-Optimized Design System */
+        :root {
+            --color-bg: #F5F3F0;
+            --color-surface: #FFFFFF;
+            --color-primary: #4A90A4;
+            --color-accent: #7DB3A1;
+            --color-text: #2C3E50;
+            --color-text-muted: #7F8C8D;
+            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-size-base: 18px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-main);
+            font-size: var(--font-size-base);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 2.5em; margin-bottom: 20px; }
+        .tagline { font-size: 1.2em; color: var(--color-text-muted); margin-bottom: 30px; }
+        .primary-btn, .secondary-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: 600;
+        }
+        .primary-btn {
+            background: var(--color-primary);
+            color: white;
+        }
+        .secondary-btn {
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 2px solid var(--color-primary);
+        }
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .benefit-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        #timeBlocks {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 400px;
+        }
+        .time-block {
+            background: var(--color-accent);
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .complete-btn {
+            background: white;
+            color: var(--color-accent);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .stats-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--color-surface);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        .stat { text-align: center; }
+        .stat-number { display: block; font-size: 24px; font-weight: bold; color: var(--color-primary); }
+        .stat-label { font-size: 12px; color: var(--color-text-muted); }
+        .reward-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--color-accent);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            transform: translateX(400px);
+            transition: transform 0.3s;
+        }
+        .reward-toast.show { transform: translateX(0); }
+    </style>
+</head>
+<body>
+    <!-- PAGE 1: Landing Page -->
+    <div id="landingPage">
+        <header class="hero">
+            <h1>Your Brain Works Differently.<br>Your Tools Should Too.</h1>
+            <p class="tagline">A task manager that understands ADHD: time blindness, overwhelm & the need for instant wins.</p>
+            <button id="startBtn" class="primary-btn">Start Using FocusFlow</button>
+        </header>
+        <section class="benefits">
+            <div class="benefit-card">
+                <h3>🎯 Time Blindness Blocker</h3>
+                <p>Visual time blocks that show actual vs. planned time</p>
+            </div>
+            <div class="benefit-card">
+                <h3>⚡ Dopamine Rewards</h3>
+                <p>Microwins, streaks & celebrations that motivate ADHD brains</p>
+            </div>
+            <div class="benefit-card">
+                <h3>🧠 Externalized Memory</h3>
+                <p>Brain dump → automatically organized tasks</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE 2: App Dashboard -->
+    <div id="appPage" style="display: none;">
+        <header style="padding: 20px;">
+            <h1>FocusFlow Dashboard</h1>
+            <input type="text" id="quickCapture" placeholder="Dump your brain here... (Ctrl+K)">
+        </header>
+        <main>
+            <section id="timeBlocks"></section>
+        </main>
+        <footer class="stats-bar">
+            <div class="stat">
+                <span class="stat-number" id="streak">0</span>
+                <span class="stat-label">Day Streak</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number" id="completed">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number" id="focusTime">0</span>
+                <span class="stat-label">Focus Hours</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ALL JAVASCRIPT -->
+    <script>
+        // ADHD Task Manager Engine (all in one place)
+        class FocusFlowApp {
+            constructor() {
+                this.tasks = JSON.parse(localStorage.getItem('focusflow-tasks') || '[]');
+                this.init();
+            }
+
+            init() {
+                // Show app page when clicking start
+                document.getElementById('startBtn').onclick = () => {
+                    document.getElementById('landingPage').style.display = 'none';
+                    document.getElementById('appPage').style.display = 'block';
+                    document.getElementById('quickCapture').focus();
+                };
+
+                // Quick capture
+                document.getElementById('quickCapture').onkeypress = (e) => {
+                    if (e.key === 'Enter') {
+                        this.quickCapture(e.target.value);
+                        e.target.value = '';
+                    }
+                };
+
+                // Keyboard shortcut (Ctrl+K)
+                document.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        document.getElementById('quickCapture').focus();
+                    }
+                });
+
+                this.renderTasks();
+            }
+
+            quickCapture(text) {
+                if (!text.trim()) return;
+                const task = {
+                    id: Date.now(),
+                    text: text,
+                    priority: this.inferPriority(text),
+                    created: new Date(),
+                    status: 'active',
+                    estimatedMins: 30,
+                };
+                this.tasks.push(task);
+                this.saveTasks();
+                this.showDopamineHit('Task Captured! 🎉');
+                this.renderTasks();
+            }
+
+            inferPriority(text) {
+                const high = ['deadline', 'must', 'urgent', 'today'];
+                const low = ['someday', 'maybe', 'later'];
+                const t = text.toLowerCase();
+                if (high.some(kw => t.includes(kw))) return 'high';
+                if (low.some(kw => t.includes(kw))) return 'low';
+                return 'medium';
+            }
+
+            renderTasks() {
+                const container = document.getElementById('timeBlocks');
+                container.innerHTML = '<h2>Today\'s Tasks</h2>';
+                this.tasks.filter(t => t.status === 'active').forEach(task => {
+                    const block = document.createElement('div');
+                    block.className = 'time-block';
+                    block.innerHTML = `
+                        <span>${task.text}</span>
+                        <button class="complete-btn" onclick="app.completeTask(${task.id})">✓</button>
+                    `;
+                    container.appendChild(block);
+                });
+            }
+
+            completeTask(id) {
+                this.tasks = this.tasks.filter(t => t.id !== id);
+                this.saveTasks();
+                this.showDopamineHit('Task Completed! 🏆');
+                this.updateStats();
+                this.renderTasks();
+            }
+
+            showDopamineHit(message) {
+                const toast = document.createElement('div');
+                toast.className = 'reward-toast';
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 100);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => document.body.removeChild(toast), 300);
+                }, 2000);
+            }
+
+            updateStats() {
+                const completed = document.getElementById('completed');
+                const current = parseInt(completed.textContent);
+                completed.textContent = current + 1;
+            }
+
+            saveTasks() {
+                localStorage.setItem('focusflow-tasks', JSON.stringify(this.tasks));
+            }
+        }
+
+        // Initialize the app
+        const app = new FocusFlowApp();
+    </script>
+</body>
+</html>
